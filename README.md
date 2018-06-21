@@ -160,6 +160,13 @@ Subtle details you might care about...
  * This tags the commit from which the release tarball was created (`commit_hash`), not the commit which finalizes the release in the `releases` directory. This is primarily to ensure git tags match `commit_hash` and refer to the underlying source where changes between versions occur (as opposed to when it was finalized which may have a different set of files).
 
 
+## Development
+
+To run tests...
+
+  $ ginkgo -r
+
+
 ## License
 
 [MIT License](LICENSE)

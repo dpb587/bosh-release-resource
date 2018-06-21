@@ -76,10 +76,10 @@ func (r Repository) Push() error {
 	return errors.New("TODO")
 }
 
-func (r Repository) Configure(committerName, committerEmail string) error {
+func (r Repository) Configure(authorName, authorEmail string) error {
 	configs := map[string]string{
-		"user.name":  committerName,
-		"user.email": committerEmail,
+		"user.name":  authorName,
+		"user.email": authorEmail,
 	}
 
 	for k, v := range configs {

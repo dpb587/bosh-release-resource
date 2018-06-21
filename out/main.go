@@ -50,7 +50,7 @@ func main() {
 
 	tarballPath := loadTarballPath(request, release)
 
-	err = repository.Configure(request.Params.CommitterName, request.Params.CommitterEmail)
+	err = repository.Configure(request.Params.AuthorName, request.Params.AuthorEmail)
 	if err != nil {
 		api.Fatal(errors.Wrap(err, "configuring"))
 	}

@@ -60,8 +60,8 @@ Parameters:
  * **`tarball`** - path to an existing release tarball to finalize (one of `repository` or `tarball` must be configured)
  * **`version`** - path to the file with contents of a specific version to use
  * `commit_file` - path to the file with contents of a commit message (default message `Version {version}`)
- * `committer_name` - full name to use when committing (default `CI Bot`)
- * `committer_email` - email address to use when committing (default `ci@localhost`)
+ * `author_name` - full name to use as commit author (default `CI Bot`)
+ * `author_email` - email address to use as commit author (default `ci@localhost`)
  * `rebase` - enable automatic rebasing if there are conflicts on push (default `false`)
  * `skip_tag` - disable creating an annotated tag pointing to the commit the release tarball was created with (default `false`)
 

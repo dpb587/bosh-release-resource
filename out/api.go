@@ -6,8 +6,8 @@ import (
 
 var DefaultRequest = Request{
 	Params: Params{
-		CommitterName:  "CI Bot",
-		CommitterEmail: "ci@localhost",
+		AuthorName:  "CI Bot",
+		AuthorEmail: "ci@localhost",
 	},
 }
 
@@ -21,11 +21,11 @@ type Params struct {
 	Repository string `json:"repository,omitempty"`
 	Version    string `json:"version"`
 
-	CommitFile     string `json:"commit_file,omitempty"`
-	CommitterName  string `json:"committer_name,omitempty"`
-	CommitterEmail string `json:"committer_email,omitempty"`
-	Rebase         bool   `json:"rebase,omitempty"`
-	SkipTag        bool   `json:"skip_tag,omitempty"`
+	CommitFile  string `json:"commit_file,omitempty"`
+	AuthorName  string `json:"author_name,omitempty"`
+	AuthorEmail string `json:"author_email,omitempty"`
+	Rebase      bool   `json:"rebase,omitempty"`
+	SkipTag     bool   `json:"skip_tag,omitempty"`
 }
 
 type Response struct {

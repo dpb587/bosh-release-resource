@@ -1,9 +1,4 @@
 language: go
 go:
 - 1.10.x
-install:
-- |
-  wget -qO /usr/local/bin/bosh http://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-3.0.1-linux-amd64
-  && echo "ccc893bab8b219e9e4a628ed044ebca6c6de9ca0  /usr/local/bin/bosh" | sha1sum -c
-  && chmod +x /usr/local/bin/bosh
-script: go run ./vendor/github.com/onsi/ginkgo/ginkgo/*.go -r --randomizeAllSpecs --randomizeSuites --race --trace && go vet ./...
+script: bin/test

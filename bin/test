@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -eu
+
+mkdir -p tmp/bin
+export PATH="$PWD/tmp/bin:$PATH"
+
+if ! which bosh > /dev/null
+then
+  bosh=bosh-cli-3.0.1-linux-amd64
+
+  echo "downloading $bosh..."
+
+  wget -qO tmp/bin/$bosh http://s3.amazonaws.com/bosh-cli-artifacts/$bosh
+  echo "ccc893bab8b219e9e4a628ed044ebca6c6de9ca0  tmp/bin/$bosh" | shasum -c > /dev/null
+  chmod +x tmp/bin/$bosh
+
+  ln -sf $bosh tmp/bin/bosh
+fi
+
+echo "building ginkgo..."
+go build -o tmp/bin/ginkgo ./vendor/github.com/onsi/ginkgo/ginkgo/*.go
+
+echo "running go fmt..."
+go fmt ./...
+
+echo "running go vet..."
+go vet ./...
+
+echo "running ginkgo..."
+ginkgo -r --randomizeAllSpecs --randomizeSuites --race --trace

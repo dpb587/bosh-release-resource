@@ -102,62 +102,23 @@ After switching to this `bosh-release`, the resource would look like...
     - name: concourse
       type: bosh-release
       source:
-        repository: https://github.com/concourse/concourse
+        repository: https://github.com/concourse/concourse.git
 
 And jobs using this `bosh-release` resource should continue to work as before unless they relied on the `url` or `sha1` files (which are no longer applicable since there is not a public URL to download the tarball).
 
 
 ### Simple Triggering Pipeline
 
-A simple example of watching a release and sending a [Slack notification](https://github.com/cloudfoundry-community/slack-notification-resource)...
-
-    groups:
-    - name: all
-      jobs:
-      - notify
-    jobs:
-    - name: notify
-      plan:
-      - get: release
-        trigger: true
-      - put: slack
-        params:
-          text: "A new version of bosh is available."
-          text_file: release/version
-          attachments:
-          - author_icon: https://avatars1.githubusercontent.com/u/621746?s=50&v=4
-            author_name: cloudfoundry/bosh
-            author_link: https://github.com/cloudfoundry/bosh
-            title: Release Notes for v$TEXT_FILE_CONTENT
-            title_link: https://github.com/cloudfoundry/bosh/releases/tag/v$TEXT_FILE_CONTENT
-            color: good
-    resources:
-    - name: release
-      type: bosh-release
-      source:
-        repository: https://github.com/cloudfoundry/bosh
-    - name: slack
-      type: slack-notification
-      source:
-        url: https://hooks.slack.com/services/...snip...
-    resource_types:
-    - name: bosh-release
-      type: docker-image
-      source:
-        repository: dpb587/bosh-release-resource
-    - name: slack-notification
-      type: docker-image
-      source:
-        repository: cfcommunity/slack-notification-resource
+The [bosh.yml`](examples/bosh.yml) example watches for new releases and sends a [Slack notification](https://github.com/cloudfoundry-community/slack-notification-resource).
 
 
 ## Caveats
 
 Subtle details you might care about...
 
+ * This tags the commit from which the release tarball was created (`commit_hash`), not the commit which finalizes the release in the `releases` directory. This is primarily to ensure git tags match `commit_hash` and refer to the underlying source where changes between versions occur (as opposed to when it was finalized which may have a different set of files).
  * This currently requires that versions match semver conventions. If you use a non-semver versioning strategy, this may not work for all releases. This is primarily for simplicity of implementation; if too many releases need to support other conventions, it is probably worth changing.
  * This currently requires an externally-managed version file rather than supporting `bosh`'s automatic major version-bumping strategy. This is primarily to encourage explicit, semver-based version management; if this becomes too burdensome, it is probably worth changing.
- * This tags the commit from which the release tarball was created (`commit_hash`), not the commit which finalizes the release in the `releases` directory. This is primarily to ensure git tags match `commit_hash` and refer to the underlying source where changes between versions occur (as opposed to when it was finalized which may have a different set of files).
 
 
 ## Development

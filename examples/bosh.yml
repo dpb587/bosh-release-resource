@@ -1,0 +1,34 @@
+jobs:
+- name: notify
+  plan:
+  - get: release
+    trigger: true
+  - put: slack
+    params:
+      text: "A new version of bosh is available."
+      text_file: release/version
+      attachments:
+      - author_icon: https://avatars1.githubusercontent.com/u/621746?s=50&v=4
+        author_name: cloudfoundry/bosh
+        author_link: https://github.com/cloudfoundry/bosh
+        title: Release Notes for v$TEXT_FILE_CONTENT
+        title_link: https://github.com/cloudfoundry/bosh/releases/tag/v$TEXT_FILE_CONTENT
+        color: good
+resources:
+- name: release
+  type: bosh-release
+  source:
+    repository: https://github.com/cloudfoundry/bosh
+- name: slack
+  type: slack-notification
+  source:
+    url: https://hooks.slack.com/services/...snip...
+resource_types:
+- name: bosh-release
+  type: docker-image
+  source:
+    repository: dpb587/bosh-release-resource
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource

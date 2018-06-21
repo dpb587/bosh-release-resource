@@ -1,6 +1,6 @@
 # bosh-release-resource
 
-[![license](https://img.shields.io/badge/license-mit-blue.svg?longCache=true)](LICENSE) [![dockerhub](https://img.shields.io/badge/dockerhub-latest-green.svg?longCache=true)](https://hub.docker.com/r/dpb587/bosh-release-resource/)
+[![license](https://img.shields.io/badge/license-mit-blue.svg?longCache=true)](LICENSE) [![build](https://travis-ci.org/dpb587/bosh-release-resource.svg)](https://travis-ci.org/dpb587/bosh-release-resource) [![dockerhub](https://img.shields.io/badge/dockerhub-latest-green.svg?longCache=true)](https://hub.docker.com/r/dpb587/bosh-release-resource/)
 
 A [Concourse](https://concourse-ci.org/) resource for working with versions of a [BOSH](https://bosh.io/) release. Specifically focused on...
 

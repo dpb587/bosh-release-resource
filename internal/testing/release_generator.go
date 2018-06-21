@@ -3,7 +3,7 @@ package testing
 import (
 	. "github.com/onsi/ginkgo"
 
-  "fmt"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -41,17 +41,17 @@ func GenerateRelease() (string, error) {
 		return "", err
 	}
 
-  GinkgoWriter.Write([]byte(fmt.Sprintf("$ cd %s", releasedir)))
+	GinkgoWriter.Write([]byte(fmt.Sprintf("$ cd %s", releasedir)))
 
 	for _, cmd := range cmds {
-    cmd = strings.Replace(cmd, "$releasedir", releasedir, -1)
+		cmd = strings.Replace(cmd, "$releasedir", releasedir, -1)
 
-    GinkgoWriter.Write([]byte(fmt.Sprintf("$ %s\n", cmd)))
+		GinkgoWriter.Write([]byte(fmt.Sprintf("$ %s\n", cmd)))
 
 		cmd := exec.Command("bash", "-euc", cmd)
 		cmd.Dir = releasedir
-    cmd.Stdout = GinkgoWriter
-    cmd.Stderr = GinkgoWriter
+		cmd.Stdout = GinkgoWriter
+		cmd.Stderr = GinkgoWriter
 
 		err := cmd.Run()
 		if err != nil {

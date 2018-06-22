@@ -123,9 +123,7 @@ Subtle details you might care about...
 
 ## Development
 
-To run tests...
-
-  $ ginkgo -r
+Before committing, tests can be run locally with [`bin/test`](bin/test). After pushing, [Travis CI](https://travis-ci.org/) should automatically run tests for commits and pull requests.
 
 
 ## License

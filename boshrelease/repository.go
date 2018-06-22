@@ -84,7 +84,7 @@ func (r Repository) Configure(authorName, authorEmail string) error {
 
 	for k, v := range configs {
 		err := r.run("config", k, v)
-		if err == nil {
+		if err != nil {
 			return errors.Wrapf(err, "setting %s", k)
 		}
 	}

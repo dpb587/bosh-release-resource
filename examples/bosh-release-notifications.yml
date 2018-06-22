@@ -3,6 +3,8 @@ jobs:
   plan:
   - get: release
     trigger: true
+    params:
+      tarball: false
   - put: slack
     params:
       text: "A new version of bosh is available."

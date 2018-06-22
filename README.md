@@ -2,11 +2,7 @@
 
 [![license](https://img.shields.io/badge/license-mit-blue.svg?longCache=true)](LICENSE) [![build](https://travis-ci.org/dpb587/bosh-release-resource.svg)](https://travis-ci.org/dpb587/bosh-release-resource) [![dockerhub](https://img.shields.io/badge/dockerhub-latest-green.svg?longCache=true)](https://hub.docker.com/r/dpb587/bosh-release-resource/)
 
-A [Concourse](https://concourse-ci.org/) resource for working with versions of a [BOSH](https://bosh.io/) release. Specifically focused on...
-
- * supporting non-[bosh.io releases](https://bosh.io/releases), private release repositories, and firewalled environments;
- * consolidating `finalize-release` tasks across release repositories; and
- * supporting version constraints.
+A [Concourse](https://concourse-ci.org/) resource for working with versions of a [BOSH](https://bosh.io/) release. Specifically focused on support for non-[bosh.io releases](https://bosh.io/releases), private release repositories, version constraints, dev releases, and `finalize-release` tasks.
 
 
 ## Source Configuration
@@ -83,12 +79,9 @@ To use this resource type, you should configure it in the [`resource_types`](htt
 The default `latest` tag will refer to the current, stable version of this Docker image. For using the latest development version, you can refer to the `master` tag. If you need to refer to an older version of this image, you can refer to the appropriate `v{version}` tag.
 
 
-## Examples
+### Alternative to `bosh-io-release`
 
-A few example scenarios which may be helpful...
-
-
-### Switching from `bosh-io-release`
+This resource is generally equivalent to the `check`/`get` behaviors of [`bosh-io-release`](https://github.com/concourse/bosh-io-release-resource). The notable difference is that `url` and `sha1` are not provided since local tarballs are always created.
 
 If you originally used the `bosh-io-release`...
 
@@ -97,19 +90,19 @@ If you originally used the `bosh-io-release`...
       source:
         repository: concourse/concourse
 
-After switching to this `bosh-release`, the resource would look like...
+The equivalent `bosh-release` resource would be...
 
     - name: concourse
       type: bosh-release
       source:
         repository: https://github.com/concourse/concourse.git
 
-And jobs using this `bosh-release` resource should continue to work as before unless they relied on the `url` or `sha1` files (which are no longer applicable since there is not a public URL to download the tarball).
 
+## Examples
 
-### Simple Triggering Pipeline
+A few examples which may be helpful...
 
-The [bosh.yml`](examples/bosh.yml) example watches for new releases and sends a [Slack notification](https://github.com/cloudfoundry-community/slack-notification-resource).
+ * [BOSH Release Notifications](examples/bosh-release-notifications.yml) - a pipeline to send a [Slack](https://slack.com/) notification when there is a new release of [cloudfoundry/bosh](https://github.com/cloudfoundry/bosh)
 
 
 ## Caveats

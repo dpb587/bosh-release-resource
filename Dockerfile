@@ -4,9 +4,9 @@ COPY . .
 ENV CGO_ENABLED=0
 RUN mkdir -p /opt/resource
 RUN git rev-parse HEAD | tee /opt/resource/version
-RUN go build -o /opt/resource/check check/*.go
-RUN go build -o /opt/resource/in in/*.go
-RUN go build -o /opt/resource/out out/*.go
+RUN go build -o /opt/resource/check ./check
+RUN go build -o /opt/resource/in ./in
+RUN go build -o /opt/resource/out ./out
 
 FROM alpine:3.4 as binaries
 RUN apk --no-cache add wget

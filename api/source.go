@@ -12,6 +12,7 @@ type Source struct {
 	Branch             string                 `json:"branch"`
 	Name               string                 `json:"name,omitempty"`
 	Version            string                 `json:"version,omitempty"`
+	DevReleases        bool                   `json:"dev_releases,omitempty"`
 	VersionConstraints *semver.Constraints    `json:"-"`
 	PrivateConfig      map[string]interface{} `json:"private_config,omitempty"`
 	PrivateKey         string                 `json:"private_key"`

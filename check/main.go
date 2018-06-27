@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/dpb587/bosh-release-resource/api"
@@ -43,18 +44,43 @@ func main() {
 		}
 	}
 
-	if request.Version != nil {
-		constraint, err := semver.NewConstraint(fmt.Sprintf(">%s", request.Version.Version))
-		if err != nil {
-			api.Fatal(errors.Wrap(err, "bad version: version"))
+	var versionsRaw []*semver.Version
+
+	if request.Source.DevReleases {
+		var sinceCommit string
+
+		if request.Version != nil {
+			version, err := semver.NewVersion(request.Version.Version)
+			if err != nil {
+				api.Fatal(errors.Wrap(err, "bad version: parsing"))
+			}
+
+			prereleaseSplit := strings.Split(version.Prerelease(), ".")
+			if prereleaseSplit[2] != "commit" {
+				api.Fatal(errors.New("bad version: commit expected in prerelease"))
+			}
+
+			sinceCommit = prereleaseSplit[3]
 		}
 
-		constraints = append(constraints, constraint)
-	}
+		versionsRaw, err = release.DevVersions(releaseName, sinceCommit)
+		if err != nil {
+			api.Fatal(errors.Wrap(err, "bad release: versions"))
+		}
+	} else {
+		if request.Version != nil {
+			constraint, err := semver.NewConstraint(fmt.Sprintf(">%s", request.Version.Version))
+			if err != nil {
+				api.Fatal(errors.Wrap(err, "bad version: version"))
+			}
 
-	versionsRaw, err := release.Versions(releaseName, constraints)
-	if err != nil {
-		api.Fatal(errors.Wrap(err, "bad release: versions"))
+			constraints = append(constraints, constraint)
+		}
+
+		versionsRaw, err = release.Versions(releaseName, constraints)
+		if err != nil {
+			api.Fatal(errors.Wrap(err, "bad release: versions"))
+		}
 	}
 
 	response := Response{}

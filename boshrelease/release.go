@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/pkg/errors"
@@ -42,27 +43,52 @@ func (r Release) Name() (string, error) {
 	return config.Name(), nil
 }
 
+func (r Release) DevVersions(name, sinceCommit string) ([]*semver.Version, error) {
+	commits, err := r.repository.GetCommitList(sinceCommit)
+	if err != nil {
+		return nil, errors.Wrap(err, "loading commits")
+	}
+
+	var versions []*semver.Version
+
+	for _, commit := range commits {
+		indexBytes, err := r.repository.Show(commit.Commit, path.Join("releases", name, "index.yml"))
+		if err != nil {
+			return nil, errors.Wrapf(err, "loading releases index.yml for %s", commit.Commit)
+		}
+
+		parsedVersions, err := r.parseReleaseIndex(indexBytes)
+		if err != nil {
+			return nil, errors.Wrapf(err, "parsing releases index.yml for %s", commit.Commit)
+		}
+
+		baseVersion, err := parsedVersions[0].IncPatch().SetPrerelease(fmt.Sprintf("dev.%s.commit.%s", commit.CommitDate.Format("20060102T150405Z"), commit.Commit))
+		if err != nil {
+			return nil, errors.Wrapf(err, "creating version for %s", commit.Commit)
+		}
+
+		versions = append(versions, &baseVersion)
+	}
+
+	sort.Sort(sort.Reverse(semver.Collection(versions)))
+
+	return versions, nil
+}
+
 func (r Release) Versions(name string, constraints []*semver.Constraints) ([]*semver.Version, error) {
 	bytes, err := ioutil.ReadFile(path.Join(r.repository.Path(), "releases", name, "index.yml"))
 	if err != nil {
 		return nil, errors.Wrap(err, "reading index.yml")
 	}
 
-	var index releaseIndex
-
-	err = yaml.Unmarshal(bytes, &index)
+	parsedVersions, err := r.parseReleaseIndex(bytes)
 	if err != nil {
 		return nil, errors.Wrap(err, "parsing index.yml")
 	}
 
 	var versions []*semver.Version
 
-	for _, build := range index.Builds {
-		version, err := semver.NewVersion(build.Version)
-		if err != nil {
-			return nil, errors.Wrapf(err, "parsing version %s", build.Version)
-		}
-
+	for _, version := range parsedVersions {
 		match := true
 
 		for _, constraint := range constraints {
@@ -76,9 +102,47 @@ func (r Release) Versions(name string, constraints []*semver.Constraints) ([]*se
 		versions = append(versions, version)
 	}
 
-	sort.Sort(sort.Reverse(semver.Collection(versions)))
-
 	return versions, nil
+}
+
+func (r Release) CreateDevTarball(name, version, tarball string) error {
+	parsedVersion, err := semver.NewVersion(version)
+	if err != nil {
+		return errors.Wrap(err, "parsing dev version")
+	}
+
+	prereleaseSplit := strings.Split(parsedVersion.Prerelease(), ".")
+	if prereleaseSplit[2] != "commit" {
+		return errors.New("commit expected in prerelease")
+	}
+
+	err = r.repository.Checkout(prereleaseSplit[3])
+	if err != nil {
+		return errors.Wrap(err, "checking out dev release")
+	}
+
+	err = r.writePrivateConfig()
+	if err != nil {
+		return errors.Wrap(err, "private.yml")
+	}
+
+	cmd := exec.Command(
+		"bosh",
+		"create-release",
+		"--force",
+		"--tarball", tarball,
+		"--version", version,
+	)
+	cmd.Dir = r.repository.Path()
+	cmd.Stdout = os.Stderr
+	cmd.Stderr = os.Stderr
+
+	err = cmd.Run()
+	if err != nil {
+		return errors.Wrap(err, "creating tarball")
+	}
+
+	return nil
 }
 
 func (r Release) CreateTarball(name, version, tarball string) error {
@@ -90,8 +154,7 @@ func (r Release) CreateTarball(name, version, tarball string) error {
 	cmd := exec.Command(
 		"bosh",
 		"create-release",
-		"--tarball",
-		tarball,
+		"--tarball", tarball,
 		filepath.Join("releases", name, fmt.Sprintf("%s-%s.yml", name, version)),
 	)
 	cmd.Dir = r.repository.Path()
@@ -159,4 +222,28 @@ func (r Release) writePrivateConfig() error {
 	}
 
 	return nil
+}
+
+func (r Release) parseReleaseIndex(bytes []byte) ([]*semver.Version, error) {
+	var index releaseIndex
+
+	err := yaml.Unmarshal(bytes, &index)
+	if err != nil {
+		return nil, errors.Wrap(err, "parsing index.yml")
+	}
+
+	var versions []*semver.Version
+
+	for _, build := range index.Builds {
+		version, err := semver.NewVersion(build.Version)
+		if err != nil {
+			return nil, errors.Wrapf(err, "parsing version %s", build.Version)
+		}
+
+		versions = append(versions, version)
+	}
+
+	sort.Sort(sort.Reverse(semver.Collection(versions)))
+
+	return versions, nil
 }

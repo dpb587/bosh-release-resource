@@ -46,7 +46,15 @@ func main() {
 	}
 
 	if request.Params.Tarball {
-		err = release.CreateTarball(
+		var f func(string, string, string) error
+
+		if request.Source.DevReleases {
+			f = release.CreateDevTarball
+		} else {
+			f = release.CreateTarball
+		}
+
+		err = f(
 			releaseName,
 			request.Version.Version,
 			filepath.Join(destination, "release.tgz"),

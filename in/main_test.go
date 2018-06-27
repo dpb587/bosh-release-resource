@@ -96,5 +96,62 @@ var _ = Describe("Main", func() {
 				Expect(string(data)).To(Equal("5.0.0"))
 			})
 		})
+
+		It("works with dev releases", func() {
+			command := exec.Command(cli, tmpdir)
+			command.Stdin = bytes.NewBufferString(fmt.Sprintf(`{
+	"source": {
+			"repository": "%s",
+			"dev_releases": true
+	},
+	"version": {
+		"version": "4.2.2-dev.20180410T135329Z.commit.59f7d9c"
+	}
+}`, openvpnRepository))
+
+			stdout := &bytes.Buffer{}
+
+			session, err := gexec.Start(command, stdout, GinkgoWriter)
+			Expect(err).NotTo(HaveOccurred())
+
+			session.Wait(time.Minute)
+
+			By("stdout", func() {
+				var metadata map[string]interface{}
+
+				err = json.Unmarshal(stdout.Bytes(), &metadata)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(metadata["version"].(map[string]interface{})["version"].(string)).To(Equal("4.2.2-dev.20180410T135329Z.commit.59f7d9c"))
+				Expect(metadata["metadata"].([]interface{})).To(ContainElement(HaveKeyWithValue("name", "bosh")))
+				Expect(metadata["metadata"].([]interface{})).To(ContainElement(HaveKeyWithValue("name", "time")))
+			})
+
+			By("name", func() {
+				data, err := ioutil.ReadFile(path.Join(tmpdir, "name"))
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(string(data)).To(Equal("openvpn"))
+			})
+
+			By("release.tgz", func() {
+				stat, err := os.Stat(path.Join(tmpdir, "release.tgz"))
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(stat.Size()).To(BeNumerically(">", 1024000))
+			})
+
+			By("source", func() {
+				_, err := os.Stat(path.Join(tmpdir, "source"))
+				Expect(os.IsNotExist(err)).To(BeTrue())
+			})
+
+			By("version", func() {
+				data, err := ioutil.ReadFile(path.Join(tmpdir, "version"))
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(string(data)).To(Equal("4.2.2-dev.20180410T135329Z.commit.59f7d9c"))
+			})
+		})
 	})
 })

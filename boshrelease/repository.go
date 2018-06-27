@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -170,7 +171,61 @@ func (r Repository) Tag(commit, tag, message string) error {
 	return nil
 }
 
+type Commit struct {
+	Commit     string
+	CommitDate time.Time
+}
+
+func (r Repository) GetCommitList(since string) ([]Commit, error) {
+	stdout := &bytes.Buffer{}
+	revrange := "HEAD"
+
+	if since == "" {
+		revrange = fmt.Sprintf("HEAD^1...%s", revrange)
+	} else {
+		revrange = fmt.Sprintf("%s...%s", since, revrange)
+	}
+
+	err := r.runRaw(stdout, "log", "--format=%h %ci", revrange)
+	if err != nil {
+		return nil, errors.Wrap(err, "running git log")
+	}
+
+	var commits []Commit
+
+	for _, line := range strings.Split(strings.TrimSpace(stdout.String()), "\n") {
+		lineSplit := strings.SplitN(line, " ", 2)
+		commitDate, err := time.Parse("2006-01-02 15:04:05 -0700", lineSplit[1])
+		if err != nil {
+			return nil, errors.Wrapf(err, "parsing commit date of commit %s", lineSplit[0])
+		}
+
+		commits = append(commits, Commit{
+			Commit:     lineSplit[0],
+			CommitDate: commitDate.UTC(),
+		})
+	}
+
+	return commits, nil
+}
+
+func (r Repository) Show(commitish, path string) ([]byte, error) {
+	stdout := &bytes.Buffer{}
+
+	err := r.runRaw(stdout, "show", fmt.Sprintf("%s:%s", commitish, path))
+
+	return stdout.Bytes(), err
+}
+
+func (r Repository) Checkout(commitish string) error {
+	return r.run("checkout", commitish)
+}
+
 func (r Repository) run(args ...string) error {
+	return r.runRaw(os.Stderr, args...)
+}
+
+func (r Repository) runRaw(stdout io.Writer, args ...string) error {
 	var executable = "git"
 
 	if r.privateKey != "" && (args[0] == "clone" || args[0] == "pull" || args[0] == "push") {
@@ -221,9 +276,11 @@ exec git "$@"`, privateKey.Name())), 0500)
 		executable = executableWrapper.Name()
 	}
 
+	// fmt.Fprintf(os.Stderr, "> %s %s\n", executable, strings.Join(args, " "))
+
 	cmd := exec.Command(executable, args...)
 	cmd.Dir = r.tmpdir
-	cmd.Stdout = os.Stderr
+	cmd.Stdout = stdout
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()

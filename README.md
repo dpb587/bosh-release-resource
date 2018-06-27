@@ -9,7 +9,8 @@ A [Concourse](https://concourse-ci.org/) resource for working with versions of a
 
  * **`repository`** - location of the BOSH release git repository
  * `branch` - the branch to use (optional unless using `out`; uses default remote branch)
- * `name` - a specific release name to use (by default, `name` from `config/final.yml` will be used)
+ * `dev_releases` - set to `true` to create dev releases from every commit
+ * `name` - a specific release name to use (default is `name` from `config/final.yml`)
  * `private_config` - a hash of settings which will be serialized to `config/private.yml` for `in`/`out`
  * `private_key` - a SSH private key when using private git repositories
  * `version` - a [supported](https://github.com/Masterminds/semver#basic-comparisons) version constraint (e.g. `2.x`, `>= 2.3.4`, `>2.3.2, <3`)
@@ -20,6 +21,8 @@ A [Concourse](https://concourse-ci.org/) resource for working with versions of a
 ### `check`
 
 Get the latest versions of the release.
+
+When `dev_releases` is enabled, the version will be in the format of `((version))-dev.((commit-date-utc))+commit.((short-commit-hash))`. The version number is an incremented patch from the latest final version (as of the referenced commit), followed by the commit-based, pre-release data. For example, if the last final release was `5.0.0` and the last commit was made on `2018-06-13` in `dd7c33e1d`... the version would be `5.0.1-dev.20180613T040837Z.commit.dd7c33e1d`).
 
 Version:
 

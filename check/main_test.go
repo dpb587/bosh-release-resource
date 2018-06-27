@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -112,6 +113,70 @@ var _ = Describe("Main", func() {
 
 			Expect(versions).To(HaveLen(1))
 			Expect(versions).To(ContainElement(HaveKeyWithValue("version", "3.0.1")))
+		})
+
+		Describe("dev_releases = true", func() {
+			It("fetches dev releases", func() {
+				versions := runCheck(fmt.Sprintf(`{
+			"source": {
+				"repository": "%s",
+				"dev_releases": true
+			}
+		}`, releasedir))
+
+				lastCommit, err := testing.RunCommandStdout(releasedir, "git", "rev-parse", "--short", "HEAD")
+				Expect(err).NotTo(HaveOccurred())
+				lastCommit = strings.TrimSpace(lastCommit)
+
+				lastCommitDate, err := testing.RunCommandStdout(releasedir, "git", "log", "-n1", "--format=%ci", lastCommit)
+				Expect(err).NotTo(HaveOccurred())
+
+				lastCommitTime, err := time.Parse("2006-01-02 15:04:05 -0700", strings.TrimSpace(lastCommitDate))
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(versions).To(HaveLen(1))
+				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit))))
+			})
+
+			It("fetches multiple dev releases", func() {
+				thirdCommit, err := testing.RunCommandStdout(releasedir, "git", "rev-parse", "--short", "HEAD~2")
+				Expect(err).NotTo(HaveOccurred())
+				thirdCommit = strings.TrimSpace(thirdCommit)
+
+				versions := runCheck(fmt.Sprintf(`{
+			"source": {
+				"repository": "%s",
+				"dev_releases": true
+			},
+			"version": {
+				"version": "0.0.0-dev.currentlyignored.commit.%s"
+			}
+		}`, releasedir, strings.TrimSpace(thirdCommit)))
+
+				lastCommit, err := testing.RunCommandStdout(releasedir, "git", "rev-parse", "--short", "HEAD")
+				Expect(err).NotTo(HaveOccurred())
+				lastCommit = strings.TrimSpace(lastCommit)
+
+				lastCommitDate, err := testing.RunCommandStdout(releasedir, "git", "log", "-n1", "--format=%ci", lastCommit)
+				Expect(err).NotTo(HaveOccurred())
+
+				lastCommitTime, err := time.Parse("2006-01-02 15:04:05 -0700", strings.TrimSpace(lastCommitDate))
+				Expect(err).NotTo(HaveOccurred())
+
+				secondCommit, err := testing.RunCommandStdout(releasedir, "git", "rev-parse", "--short", "HEAD~1")
+				Expect(err).NotTo(HaveOccurred())
+				secondCommit = strings.TrimSpace(secondCommit)
+
+				secondCommitDate, err := testing.RunCommandStdout(releasedir, "git", "log", "-n1", "--format=%ci", secondCommit)
+				Expect(err).NotTo(HaveOccurred())
+
+				secondCommitTime, err := time.Parse("2006-01-02 15:04:05 -0700", strings.TrimSpace(secondCommitDate))
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(versions).To(HaveLen(2))
+				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit))))
+				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", secondCommitTime.UTC().Format("20060102T150405Z"), secondCommit))))
+			})
 		})
 	})
 })

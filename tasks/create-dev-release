@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -eu -o pipefail
+
+jq -n '
+  {
+    "source": {
+      "repository": "file://\(env.PWD)",
+      "dev_releases": true
+    }
+  }
+' \
+| /opt/resource/check \
+| jq '
+  {
+    "source": {
+      "repository": "file://\(env.PWD)",
+      "dev_releases": true
+    },
+    "version": first
+  }
+' \
+| /opt/resource/in "$( realpath "$1" )" \
+> /dev/null

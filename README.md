@@ -70,6 +70,15 @@ Metadata:
  * `commit` - commit reference where the new version was finalized
 
 
+### `create-dev-release`
+
+Another common task used outside of resource lifecycles is to generically create dev releases. The `create-dev-release` executable can be used to create a release tarball from the current working directory. See [`create-dev-release.yml`](tasks/create-dev-release.yml) for an example [task config](https://concourse-ci.org/tasks.html).
+
+Arguments:
+
+ * Output director for creating the release tarball
+
+
 ## Usage
 
 To use this resource type, you should configure it in the [`resource_types`](https://concourse-ci.org/resource-types.html) section of your pipeline.

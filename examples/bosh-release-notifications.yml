@@ -24,7 +24,7 @@ resources:
 - name: slack
   type: slack-notification
   source:
-    url: https://hooks.slack.com/services/...snip...
+    url: ((slack_webhook_url))
 resource_types:
 - name: bosh-release
   type: docker-image

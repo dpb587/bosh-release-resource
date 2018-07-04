@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"text/template"
 	"time"
 
 	"github.com/dpb587/bosh-release-resource/api"
@@ -27,6 +29,11 @@ func main() {
 		api.Fatal(errors.Wrap(err, "bad stdin: parse error"))
 	}
 
+	tarballNameTmpl, err := template.New("tarball_name").Parse(request.Params.TarballName)
+	if err != nil {
+		api.Fatal(errors.Wrap(err, "bad config: file_name"))
+	}
+
 	repository := boshrelease.NewRepository(request.Source.Repository, request.Source.Branch, request.Source.PrivateKey)
 
 	err = repository.Pull()
@@ -45,6 +52,18 @@ func main() {
 		}
 	}
 
+	tarballNameBuffer := &bytes.Buffer{}
+	err = tarballNameTmpl.Execute(tarballNameBuffer, struct {
+		Name    string
+		Version string
+	}{
+		Name:    releaseName,
+		Version: request.Version.Version,
+	})
+	if err != nil {
+		api.Fatal(errors.Wrap(err, "bad config: generating tarball name"))
+	}
+
 	if request.Params.Tarball {
 		var f func(string, string, string) error
 
@@ -57,7 +76,7 @@ func main() {
 		err = f(
 			releaseName,
 			request.Version.Version,
-			filepath.Join(destination, "release.tgz"),
+			filepath.Join(destination, tarballNameBuffer.String()),
 		)
 		if err != nil {
 			api.Fatal(errors.Wrap(err, "bad release"))

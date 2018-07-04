@@ -36,6 +36,7 @@ Get a specific version of the release.
 Parameters:
 
  * `tarball` - create a release tarball (default `true`)
+ * `tarball_name` - file name to use for the tarball (default `{{.Name}}-{{.Version}}.tgz`)
 
 Resource:
 
@@ -93,7 +94,7 @@ The default `latest` tag will refer to the current, stable version of this Docke
 
 ### Alternative to `bosh-io-release`
 
-This resource is generally equivalent to the `check`/`get` behaviors of [`bosh-io-release`](https://github.com/concourse/bosh-io-release-resource). The notable difference is that `url` and `sha1` are not provided since local tarballs are always created.
+This resource is generally equivalent to the `check`/`get` behaviors of [`bosh-io-release`](https://github.com/concourse/bosh-io-release-resource).
 
 If you originally used the `bosh-io-release`...
 
@@ -108,6 +109,14 @@ The equivalent `bosh-release` resource would be...
       type: bosh-release
       source:
         repository: https://github.com/concourse/concourse.git
+
+The release tarball is named `{{.Name}}-{{.Version}}.tgz`. If you were not using globs (e.g. `release/*.tgz`) you can retain the `bosh-io-release` behavior by configuring `tarball_name`. For example...
+
+    - get: stable-release
+      params:
+        tarball_name: release.tgz
+
+Note that `url` and `sha1` are not provided since local tarballs are always created.
 
 
 ## Examples

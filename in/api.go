@@ -6,7 +6,8 @@ import (
 
 var DefaultRequest = Request{
 	Params: Params{
-		Tarball: true,
+		TarballName: "{{.Name}}-{{.Version}}.tgz",
+		Tarball:     true,
 	},
 }
 
@@ -17,7 +18,8 @@ type Request struct {
 }
 
 type Params struct {
-	Tarball bool `json:"tarball"`
+	TarballName string `json:"tarball_name"`
+	Tarball     bool   `json:"tarball"`
 }
 
 type Response struct {

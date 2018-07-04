@@ -77,8 +77,8 @@ var _ = Describe("Main", func() {
 				Expect(string(data)).To(Equal("openvpn"))
 			})
 
-			By("release.tgz", func() {
-				stat, err := os.Stat(path.Join(tmpdir, "release.tgz"))
+			By("tarball", func() {
+				stat, err := os.Stat(path.Join(tmpdir, "openvpn-5.0.0.tgz"))
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(stat.Size()).To(BeNumerically(">", 1024000))
@@ -134,8 +134,8 @@ var _ = Describe("Main", func() {
 				Expect(string(data)).To(Equal("openvpn"))
 			})
 
-			By("release.tgz", func() {
-				stat, err := os.Stat(path.Join(tmpdir, "release.tgz"))
+			By("tarball", func() {
+				stat, err := os.Stat(path.Join(tmpdir, "openvpn-4.2.2-dev.20180410T135329Z.commit.59f7d9c.tgz"))
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(stat.Size()).To(BeNumerically(">", 1024000))

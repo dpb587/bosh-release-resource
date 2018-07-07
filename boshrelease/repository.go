@@ -253,9 +253,18 @@ func (r Repository) runRaw(stdout io.Writer, args ...string) error {
 
 		defer os.RemoveAll(executableWrapper.Name())
 
-		err = ioutil.WriteFile(executableWrapper.Name(), []byte(fmt.Sprintf(`#!/bin/bash
+		_, err = executableWrapper.WriteString(fmt.Sprintf(`#!/bin/bash
 
 set -eu
+
+mkdir -p ~/.ssh
+
+cat > ~/.ssh/config <<EOF
+StrictHostKeyChecking no
+LogLevel quiet
+EOF
+
+chmod 0600 ~/.ssh/config
 
 eval $(ssh-agent) > /dev/null
 
@@ -263,9 +272,14 @@ trap "kill $SSH_AGENT_PID" 0
 
 SSH_ASKPASS=false DISPLAY= ssh-add "%s" 2>/dev/null # TODO suppresses real errors?
 
-exec git "$@"`, privateKey.Name())), 0500)
+exec git "$@"`, privateKey.Name()))
 		if err != nil {
 			return errors.Wrap(err, "writing git wrapper")
+		}
+
+		err = executableWrapper.Close()
+		if err != nil {
+			return errors.Wrap(err, "closing tempfile")
 		}
 
 		err = os.Chmod(executableWrapper.Name(), 0500)

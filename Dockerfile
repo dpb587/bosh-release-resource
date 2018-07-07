@@ -21,7 +21,7 @@ RUN true \
   && chmod +x /tmp/binaries/jq
 
 FROM alpine:3.4
-RUN apk --no-cache add ca-certificates git openssh-client
+RUN apk --no-cache add bash ca-certificates git openssh-client
 COPY --from=binaries /tmp/binaries /usr/local/bin
 COPY --from=resource /opt/resource /opt/resource
 ADD tasks/create-dev-release /usr/local/bin

@@ -21,7 +21,7 @@ import (
 
 var _ = Describe("Main", func() {
 	runCLI := func(stdin string) map[string]interface{} {
-		command := exec.Command(cli)
+		command := exec.Command(cli, os.TempDir())
 		command.Stdin = bytes.NewBufferString(stdin)
 
 		stdout := &bytes.Buffer{}

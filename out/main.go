@@ -16,9 +16,14 @@ import (
 )
 
 func main() {
+	err := os.Chdir(os.Args[1])
+	if err != nil {
+		api.Fatal(errors.Wrap(err, "bad args: source dir"))
+	}
+
 	request := DefaultRequest
 
-	err := json.NewDecoder(os.Stdin).Decode(&request)
+	err = json.NewDecoder(os.Stdin).Decode(&request)
 	if err != nil {
 		api.Fatal(errors.Wrap(err, "bad stdin: parse error"))
 	}

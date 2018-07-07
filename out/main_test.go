@@ -86,7 +86,7 @@ var _ = Describe("Main", func() {
 		It("finalizes the release", func() {
 			result := runCLI(fmt.Sprintf(`{
 		"source": {
-			"repository": "%s",
+			"uri": "%s",
 			"branch": "master"
 		},
 		"params": {

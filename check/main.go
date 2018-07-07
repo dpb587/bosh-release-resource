@@ -26,7 +26,7 @@ func main() {
 		constraints = append(constraints, request.Source.VersionConstraints)
 	}
 
-	repository := boshrelease.NewRepository(request.Source.Repository, request.Source.Branch, request.Source.PrivateKey)
+	repository := boshrelease.NewRepository(request.Source.URI, request.Source.Branch, request.Source.PrivateKey)
 
 	err = repository.Pull()
 	if err != nil {

@@ -7,7 +7,7 @@ A [Concourse](https://concourse-ci.org/) resource for working with versions of a
 
 ## Source Configuration
 
- * **`repository`** - location of the BOSH release git repository
+ * **`uri`** - location of the BOSH release git repository
  * `branch` - the branch to use (optional unless using `out`; uses default remote branch)
  * `dev_releases` - set to `true` to create dev releases from every commit
  * `name` - a specific release name to use (default is `name` from `config/final.yml`)
@@ -108,7 +108,7 @@ The equivalent `bosh-release` resource would be...
     - name: concourse
       type: bosh-release
       source:
-        repository: https://github.com/concourse/concourse.git
+        uri: https://github.com/concourse/concourse.git
 
 The release tarball is named `{{.Name}}-{{.Version}}.tgz`. If you were not using globs (e.g. `release/*.tgz`) you can retain the `bosh-io-release` behavior by configuring `tarball_name`. For example...
 
@@ -116,7 +116,7 @@ The release tarball is named `{{.Name}}-{{.Version}}.tgz`. If you were not using
       params:
         tarball_name: release.tgz
 
-Note that `url` and `sha1` are not provided since local tarballs are always created.
+Note that `url` and `sha1` are not provided since tarballs are built locally.
 
 
 ## Examples

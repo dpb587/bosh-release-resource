@@ -8,7 +8,7 @@ import (
 )
 
 type Source struct {
-	Repository         string                 `json:"repository"`
+	URI                string                 `json:"uri"`
 	Branch             string                 `json:"branch"`
 	Name               string                 `json:"name,omitempty"`
 	Version            string                 `json:"version,omitempty"`

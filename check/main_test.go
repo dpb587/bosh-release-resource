@@ -56,7 +56,7 @@ var _ = Describe("Main", func() {
 		It("gets latest the version", func() {
 			versions := runCheck(fmt.Sprintf(`{
 		"source": {
-			"repository": "%s"
+			"uri": "%s"
 		}
 	}`, releasedir))
 
@@ -67,7 +67,7 @@ var _ = Describe("Main", func() {
 		It("respects version constraints", func() {
 			versions := runCheck(fmt.Sprintf(`{
 		"source": {
-			"repository": "%s",
+			"uri": "%s",
 			"version": "1.x"
 		}
 	}`, releasedir))
@@ -79,7 +79,7 @@ var _ = Describe("Main", func() {
 		It("fetches multiple new versions", func() {
 			versions := runCheck(fmt.Sprintf(`{
 		"source": {
-			"repository": "%s"
+			"uri": "%s"
 		},
 		"version": {
 			"version": "1.0.0"
@@ -94,7 +94,7 @@ var _ = Describe("Main", func() {
 		It("supports referencing non-default release name", func() {
 			versions := runCheck(fmt.Sprintf(`{
 		"source": {
-			"repository": "%s",
+			"uri": "%s",
 			"name": "custom-name"
 		}
 	}`, releasedir))
@@ -106,7 +106,7 @@ var _ = Describe("Main", func() {
 		It("supports referencing non-default branch", func() {
 			versions := runCheck(fmt.Sprintf(`{
 		"source": {
-			"repository": "%s",
+			"uri": "%s",
 			"branch": "custom-branch"
 		}
 	}`, releasedir))
@@ -119,7 +119,7 @@ var _ = Describe("Main", func() {
 			It("fetches dev releases", func() {
 				versions := runCheck(fmt.Sprintf(`{
 			"source": {
-				"repository": "%s",
+				"uri": "%s",
 				"dev_releases": true
 			}
 		}`, releasedir))
@@ -145,7 +145,7 @@ var _ = Describe("Main", func() {
 
 				versions := runCheck(fmt.Sprintf(`{
 			"source": {
-				"repository": "%s",
+				"uri": "%s",
 				"dev_releases": true
 			},
 			"version": {

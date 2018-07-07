@@ -35,7 +35,7 @@ func main() {
 	version := loadVersion(request)
 	commitMessage := loadCommitMessage(request, version)
 
-	repository := boshrelease.NewRepository(request.Source.Repository, request.Source.Branch, request.Source.PrivateKey)
+	repository := boshrelease.NewRepository(request.Source.URI, request.Source.Branch, request.Source.PrivateKey)
 
 	err = repository.Pull()
 	if err != nil {

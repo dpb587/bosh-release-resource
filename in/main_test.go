@@ -45,7 +45,7 @@ var _ = Describe("Main", func() {
 			command := exec.Command(cli, tmpdir)
 			command.Stdin = bytes.NewBufferString(fmt.Sprintf(`{
 	"source": {
-			"repository": "%s"
+			"uri": "%s"
 	},
 	"version": {
 		"version": "5.0.0"
@@ -101,7 +101,7 @@ var _ = Describe("Main", func() {
 			command := exec.Command(cli, tmpdir)
 			command.Stdin = bytes.NewBufferString(fmt.Sprintf(`{
 	"source": {
-			"repository": "%s",
+			"uri": "%s",
 			"dev_releases": true
 	},
 	"version": {

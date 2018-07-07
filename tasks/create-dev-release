@@ -5,7 +5,7 @@ set -eu -o pipefail
 jq -n '
   {
     "source": {
-      "repository": "file://\(env.PWD)",
+      "uri": "file://\(env.PWD)",
       "dev_releases": true
     }
   }
@@ -14,7 +14,7 @@ jq -n '
 | jq '
   {
     "source": {
-      "repository": "file://\(env.PWD)",
+      "uri": "file://\(env.PWD)",
       "dev_releases": true
     },
     "version": first

@@ -123,7 +123,9 @@ Note that `url` and `sha1` are not provided since tarballs are built locally.
 
 A few examples which may be helpful...
 
- * [BOSH Release Notifications](examples/bosh-release-notifications.yml) - a pipeline to send a [Slack](https://slack.com/) notification when there is a new release of [cloudfoundry/bosh](https://github.com/cloudfoundry/bosh)
+ * [BOSH Release Notifications](examples/bosh-release-notifications.yml) - a simple pipeline to send a [Slack](https://slack.com/) notification when there is a new release of [cloudfoundry/bosh](https://github.com/cloudfoundry/bosh)
+ * [dpb587/openvpn-bosh-release](https://github.com/dpb587/openvpn-bosh-release/blob/master/ci/pipelines/main.yml) - used in the pipeline for building and finalizing releases
+ * [dpb587/caddy-bosh-release](https://github.com/dpb587/caddy-bosh-release/blob/master/ci/pipelines/main.yml) - used in the pipeline for building and finalizing releases
 
 
 ## Caveats

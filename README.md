@@ -133,8 +133,9 @@ A few examples which may be helpful...
 Subtle details you might care about...
 
  * This tags the commit from which the release tarball was created (`commit_hash`), not the commit which finalizes the release in the `releases` directory. This is primarily to ensure git tags match `commit_hash` and refer to the underlying source where changes between versions occur (as opposed to when it was finalized which may have a different set of files).
- * This currently requires that versions match semver conventions. If you use a non-semver versioning strategy, this may not work for all releases. This is primarily for simplicity of implementation; if too many releases need to support other conventions, it is probably worth changing.
- * This currently requires an externally-managed version file rather than supporting `bosh`'s automatic major version-bumping strategy. This is primarily to encourage explicit, semver-based version management; if this becomes too burdensome, it is probably worth changing.
+ * This uses annotated tags as opposed to lightweight tags. This enables additional metadata to be associated with when the release is published, as opposed to being restricted to when `commit_hash` occurred.
+ * This requires that versions match semver conventions. If your release does not use a semver-compatible version, this may not work. This is primarily to encourage semver-like conventions. For releases where typical 3-tuple version numbers are not meaningful, date-based semver numbers may be a useful alternative.
+ * This currently requires an externally-provided version file rather than supporting `bosh`'s automatic major version-bumping strategy. This is primarily to encourage more explicit version management. If this becomes too burdensome, it may be worth supporting.
 
 
 ## Development

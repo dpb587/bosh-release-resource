@@ -157,14 +157,17 @@ func loadTarballPath(request Request, release *boshrelease.Release) string {
 			}
 		}
 
-		tarballPath := path.Join(request.Params.Repository, "release.tgz")
+		tarballPath, err := filepath.Abs(path.Join(request.Params.Repository, "release.tgz"))
+		if err != nil {
+			api.Fatal(errors.Wrap(err, "making absolute path"))
+		}
 
 		cmd := exec.Command("bosh", "create-release", "--force", "--tarball", tarballPath)
 		cmd.Dir = request.Params.Repository
 		cmd.Stdout = os.Stderr
 		cmd.Stderr = os.Stderr
 
-		err := cmd.Run()
+		err = cmd.Run()
 		if err != nil {
 			api.Fatal(errors.Wrap(err, "bad repository: creating release"))
 		}

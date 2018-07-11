@@ -13,6 +13,7 @@ import (
 	"github.com/dpb587/bosh-release-resource/api"
 	"github.com/dpb587/bosh-release-resource/boshrelease"
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 func main() {
@@ -144,6 +145,18 @@ func loadTarballPath(request Request, release *boshrelease.Release) string {
 	if request.Params.Tarball != "" && request.Params.Repository != "" {
 		api.Fatal(errors.New("bad params: only tarball or repository may be configured"))
 	} else if request.Params.Repository != "" {
+		if request.Source.PrivateConfig != nil {
+			privateYmlBytes, err := yaml.Marshal(request.Source.PrivateConfig)
+			if err != nil {
+				api.Fatal(errors.Wrap(err, "marshalling private.yml"))
+			}
+
+			err = ioutil.WriteFile(path.Join(request.Params.Repository, "config", "private.yml"), privateYmlBytes, 0700)
+			if err != nil {
+				api.Fatal(errors.Wrap(err, "writing private.yml"))
+			}
+		}
+
 		tarballPath := path.Join(request.Params.Repository, "release.tgz")
 
 		cmd := exec.Command("bosh", "create-release", "--force", "--tarball", tarballPath)

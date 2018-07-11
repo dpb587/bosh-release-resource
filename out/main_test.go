@@ -87,7 +87,10 @@ var _ = Describe("Main", func() {
 			result := runCLI(fmt.Sprintf(`{
 		"source": {
 			"uri": "%s",
-			"branch": "master"
+			"branch": "master",
+			"private_config": {
+				"test": "private-config"
+			}
 		},
 		"params": {
 			"repository": "%s",
@@ -100,6 +103,10 @@ var _ = Describe("Main", func() {
 
 			forkCommit, err := testing.RunCommandStdout(forkdir, "git", "rev-parse", "HEAD")
 			Expect(err).NotTo(HaveOccurred())
+
+			privateYmlBytes, err := ioutil.ReadFile(path.Join(forkdir, "config", "private.yml"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(privateYmlBytes).To(ContainSubstring("test: private-config\n"))
 
 			By("finalizing the release", func() {
 				releaseBytes, err := ioutil.ReadFile(path.Join(releasedir, "releases/fake/fake-6.3.1.yml"))

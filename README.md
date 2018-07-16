@@ -73,11 +73,31 @@ Metadata:
 
 ### `create-dev-release`
 
-Another common task used outside of resource lifecycles is to generically create dev releases. The `create-dev-release` executable can be used to create a release tarball from the current working directory. See [`create-dev-release.yml`](tasks/create-dev-release.yml) for an example [task config](https://concourse-ci.org/tasks.html).
+The `create-dev-release` script may be used to create a release tarball from a clone in the current working directory. See [`create-dev-release.yml`](tasks/create-dev-release.yml) for an example [task config](https://concourse-ci.org/tasks.html).
 
 Arguments:
 
- * Output director for creating the release tarball
+ * **Output directory** - for creating the release tarball
+
+
+### `load-release-notes`
+
+The `load-release-notes` script may be used to output release notes for a given release version from a clone in the current working directory. See [`load-release-notes.yml`](tasks/load-release-notes.yml) for an example [task config](https://concourse-ci.org/tasks.html). Release notes are checked in the following order...
+
+ * locally-committed release notes in `releases/{name}/{name}-{version}.md`
+ * GitHub release notes for tags `v{version}` or `{version}` (based on the clone's remote origin)
+
+Arguments:
+
+ * **Output path** - for writing the release notes contents
+ * **Release version** - to lookup release notes (either literal version, or path to a file whose contents is the version)
+
+Environment Variables:
+
+ * **`GITHUB_TOKEN`** - a GitHub API [OAuth authentication token](https://developer.github.com/v3/#authentication)
+ * `missing_ok` - set to `true` to exit with success even if no release notes are found
+ * `skip_github` - set to `true` to skip checking GitHub release notes
+ * `skip_local` - set to `true` to skip checking local release notes
 
 
 ## Usage

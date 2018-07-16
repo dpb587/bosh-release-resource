@@ -1,0 +1,92 @@
+#!/bin/bash
+
+set -eu -o pipefail
+
+notespath="$1"
+
+if [ -z "${version:-}" ]
+then
+  version="$2"
+
+  if [ -e "$version" ]
+  then
+    version=$( cat "$version" )
+  fi
+fi
+
+foundnotes() {
+  cat "$1" > "$notespath"
+
+  exit
+}
+
+#
+# convention: releases/$name/$name-$version.md
+#
+
+if [ "${skip_local:-}" != "true" ]
+then
+  echo "checking local release notes..." >&2
+
+  if [ -z "${name:-}" ]
+  then
+    name=$( grep -E '^(final_name|name): ' config/final.yml | awk '{ print $2 }' | head -n1 )
+  fi
+
+  if [ -e "releases/$name/$name-$version.md" ]
+  then
+    foundnotes "releases/$name/$name-$version.md"
+  fi
+fi
+
+#
+# github release notes
+#
+
+if [ "${skip_github:-}" != "true" ]
+then
+  curlgh () {
+    curl --fail --silent --show-error --header "Authorization: token $GITHUB_TOKEN" "${GITHUB_API:-https://api.github.com}$@"
+  }
+
+  tmpfile="${TMPDIR:-/tmp}"/load-release-notes-$$
+
+  trap "rm -f $tmpfile 2> /dev/null" EXIT
+
+  while read ref
+  do
+    if [ "$ref" == "" ]
+    then
+      continue
+    fi
+
+    IFS=$'\t' read owner repo <<< "$ref"
+
+    for tag in "v$version" "$version"
+    do
+      echo "checking github.com/$owner/$repo release notes for $tag..." >&2
+
+      if curlgh "/repos/$owner/$repo/releases/tags/$tag" | jq -jr '.body // ""' > "$tmpfile"
+      then
+        foundnotes "$tmpfile"
+      fi
+    done
+  done < <(
+    git remote -v | grep fetch | awk '{ print $2 }' \
+      | sed -E 's#^(.*[@/]|)github.com[:/]([^/]+)/([^/]+).*$#\2\t\3#;s#\.git$##' \
+      | grep $'\t'
+  )
+fi
+
+#
+# not found
+#
+
+echo "no release notes found" >&2
+
+if [ "${ignore_missing:-}" == "true" ]
+then
+  foundnotes /dev/null
+fi
+
+exit 1

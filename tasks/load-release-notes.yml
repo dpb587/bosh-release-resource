@@ -1,0 +1,20 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: dpb587/bosh-release-resource
+inputs:
+- name: repo
+- name: version
+outputs:
+- name: release-notes
+run:
+  dir: repo
+  path: load-release-notes
+  args:
+  - ../release-notes/release-notes
+  - ../version/version
+params:
+  GITHUB_API: ~
+  GITHUB_TOKEN: ~

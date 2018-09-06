@@ -20,7 +20,7 @@ resources:
 - name: release
   type: bosh-release
   source:
-    repository: https://github.com/cloudfoundry/bosh
+    uri: https://github.com/cloudfoundry/bosh
 - name: slack
   type: slack-notification
   source:

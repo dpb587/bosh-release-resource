@@ -138,6 +138,30 @@ var _ = Describe("Main", func() {
 				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit))))
 			})
 
+			It("ignores versions if there are no changes", func() {
+				lastCommit, err := testing.RunCommandStdout(releasedir, "git", "rev-parse", "--short", "HEAD")
+				Expect(err).NotTo(HaveOccurred())
+				lastCommit = strings.TrimSpace(lastCommit)
+
+				lastCommitDate, err := testing.RunCommandStdout(releasedir, "git", "log", "-n1", "--format=%ci", lastCommit)
+				Expect(err).NotTo(HaveOccurred())
+
+				lastCommitTime, err := time.Parse("2006-01-02 15:04:05 -0700", strings.TrimSpace(lastCommitDate))
+				Expect(err).NotTo(HaveOccurred())
+
+				versions := runCheck(fmt.Sprintf(`{
+			"source": {
+				"uri": "%s",
+				"dev_releases": true
+			},
+			"version": {
+				"version": "%s"
+			}
+		}`, releasedir, fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit)))
+
+				Expect(versions).To(HaveLen(0))
+			})
+
 			It("fetches multiple dev releases", func() {
 				thirdCommit, err := testing.RunCommandStdout(releasedir, "git", "rev-parse", "--short", "HEAD~2")
 				Expect(err).NotTo(HaveOccurred())

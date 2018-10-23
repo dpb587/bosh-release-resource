@@ -194,6 +194,10 @@ func (r Repository) GetCommitList(since string) ([]Commit, error) {
 	var commits []Commit
 
 	for _, line := range strings.Split(strings.TrimSpace(stdout.String()), "\n") {
+		if line == "" {
+			continue
+		}
+
 		lineSplit := strings.SplitN(line, " ", 2)
 		commitDate, err := time.Parse("2006-01-02 15:04:05 -0700", lineSplit[1])
 		if err != nil {

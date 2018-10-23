@@ -22,6 +22,7 @@ func GenerateRelease() (string, error) {
 			"echo '--- { name: fake, blobstore: { provider: local, options: { blobstore_path: $PWD/tmp/blobstore } } }' > $PWD/config/final.yml",
 			"bosh generate-job fake1",
 			"bosh generate-package fake1",
+			"touch src/.gitkeep",
 			"git add . && git commit -m 'init'",
 			"bosh create-release --final --version=1.0.0",
 			"git add . && git commit -m 'v1.0.0'",

@@ -9,20 +9,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-func RunCommands(dir string, cmds []string) error {
+func RunCommands(dir string, commands []string) error {
 	ginkgo.GinkgoWriter.Write([]byte(fmt.Sprintf("$ cd %s\n", dir)))
 
-	for _, cmd := range cmds {
-		ginkgo.GinkgoWriter.Write([]byte(fmt.Sprintf("$ %s\n", cmd)))
+	for _, command := range commands {
+		ginkgo.GinkgoWriter.Write([]byte(fmt.Sprintf("$ %s\n", command)))
 
-		cmd := exec.Command("bash", "-euc", cmd)
+		cmd := exec.Command("bash", "-euc", command)
 		cmd.Dir = dir
 		cmd.Stdout = ginkgo.GinkgoWriter
 		cmd.Stderr = ginkgo.GinkgoWriter
 
 		err := cmd.Run()
 		if err != nil {
-			return errors.Wrapf(err, "running `%s`", cmd)
+			return errors.Wrapf(err, "running `%s`", command)
 		}
 	}
 

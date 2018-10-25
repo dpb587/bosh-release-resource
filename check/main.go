@@ -56,11 +56,9 @@ func main() {
 			}
 
 			prereleaseSplit := strings.Split(version.Prerelease(), ".")
-			if prereleaseSplit[2] != "commit" {
-				api.Fatal(errors.New("bad version: commit expected in prerelease"))
+			if len(prereleaseSplit) > 2 && prereleaseSplit[2] == "commit" {
+				sinceCommit = prereleaseSplit[3]
 			}
-
-			sinceCommit = prereleaseSplit[3]
 		}
 
 		versionsRaw, err = release.DevVersions(releaseName, sinceCommit)

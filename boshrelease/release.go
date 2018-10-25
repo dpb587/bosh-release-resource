@@ -54,7 +54,15 @@ func (r Release) DevVersions(name, sinceCommit string) ([]*semver.Version, error
 	for _, commit := range commits {
 		indexBytes, err := r.repository.Show(commit.Commit, path.Join("releases", name, "index.yml"))
 		if err != nil {
-			return nil, errors.Wrapf(err, "loading releases index.yml for %s", commit.Commit)
+			if err.Error() == "exit status 128" {
+				// inexact error checking, but check if it's a top-level release
+				// this is hacky to support old, stubborn releases like cloudfoundry/bosh which currently use a symlink
+				indexBytes, err = r.repository.Show(commit.Commit, path.Join("releases/index.yml"))
+			}
+
+			if err != nil {
+				return nil, errors.Wrapf(err, "loading releases index.yml for %s", commit.Commit)
+			}
 		}
 
 		parsedVersions, err := r.parseReleaseIndex(indexBytes)

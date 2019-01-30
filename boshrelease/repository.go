@@ -43,7 +43,7 @@ func (r Repository) Pull() error {
 	var args []string
 
 	if _, err := os.Stat(path.Join(r.tmpdir, ".git")); os.IsNotExist(err) {
-		args = []string{"clone", "--quiet", r.repository}
+		args = []string{"clone", "--quiet", "--recurse-submodules", "--shallow-submodules", r.repository}
 
 		if r.branch != "" {
 			args = append(args, "--branch", r.branch)

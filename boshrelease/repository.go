@@ -186,7 +186,7 @@ func (r Repository) GetCommitList(since string) ([]Commit, error) {
 		revrange = fmt.Sprintf("%s...%s", since, revrange)
 	}
 
-	err := r.runRaw(stdout, "log", "--format=%h %ci", revrange)
+	err := r.runRaw(stdout, "log", "--first-parent", "--format=%h %ci", revrange)
 	if err != nil {
 		return nil, errors.Wrap(err, "running git log")
 	}

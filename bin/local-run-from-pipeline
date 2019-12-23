@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -euo pipefail
+
+pipeline="$1"; shift
+resource="$1"; shift
+operation="$1"; shift
+
+source="$( yq read "$pipeline" -j | jq --arg name "$resource" '.resources | map(select(.name == $name))[0].source' )"
+version="$( ( for v in "$@" ; do echo "$v" ; done ) | jq -Rs 'split("\n") | map(select(. != "")) | ( map(split(":") | { ( .[0] ) : ( .[1:] | join(":") ) }) | add ) // null' )"
+
+opdir="$PWD/tmp/local-run-from-pipeline"
+mkdir -p "$opdir"
+
+jq -n \
+  --argjson source "$source" \
+  --argjson version "$version" \
+  '{ "source": $source, "version": $version }' \
+  | go run "./$operation" "$opdir"

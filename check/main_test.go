@@ -27,6 +27,7 @@ var _ = Describe("Main", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		session.Wait(time.Minute)
+		Expect(session.ExitCode()).To(Equal(0))
 
 		var versions []map[string]interface{}
 
@@ -101,9 +102,9 @@ var _ = Describe("Main", func() {
 	}`, releasedir))
 
 			Expect(versions).To(HaveLen(3))
-			Expect(versions).To(ContainElement(HaveKeyWithValue("version", "1.0.0")))
-			Expect(versions).To(ContainElement(HaveKeyWithValue("version", "1.1.0")))
-			Expect(versions).To(ContainElement(HaveKeyWithValue("version", "2.0.0")))
+			Expect(versions[0]).To(HaveKeyWithValue("version", "1.0.0"))
+			Expect(versions[1]).To(HaveKeyWithValue("version", "1.1.0"))
+			Expect(versions[2]).To(HaveKeyWithValue("version", "2.0.0"))
 		})
 
 		It("supports referencing non-default release name", func() {
@@ -115,7 +116,7 @@ var _ = Describe("Main", func() {
 	}`, releasedir))
 
 			Expect(versions).To(HaveLen(1))
-			Expect(versions).To(ContainElement(HaveKeyWithValue("version", "2.0.1")))
+			Expect(versions[0]).To(HaveKeyWithValue("version", "2.0.1"))
 		})
 
 		It("supports referencing non-default branch", func() {
@@ -127,7 +128,7 @@ var _ = Describe("Main", func() {
 	}`, releasedir))
 
 			Expect(versions).To(HaveLen(1))
-			Expect(versions).To(ContainElement(HaveKeyWithValue("version", "3.0.1")))
+			Expect(versions[0]).To(HaveKeyWithValue("version", "3.0.1"))
 		})
 
 		Describe("dev_releases = true", func() {
@@ -150,7 +151,7 @@ var _ = Describe("Main", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(versions).To(HaveLen(1))
-				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit))))
+				Expect(versions[0]).To(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit)))
 			})
 
 			It("only follows the 0th parent in merges", func() {
@@ -193,13 +194,13 @@ var _ = Describe("Main", func() {
 				"dev_releases": true
 			},
 			"version": {
-				"version": "0.0.0-dev.YYYYMMDDTHHIISSZ.commit.%s"
+				"version": "0.0.0-dev.%s.commit.%s"
 			}
-		}`, releasedir, preMergeCommit))
+		}`, releasedir, preMergeCommitTime.UTC().Format("20060102T150405Z"), preMergeCommit))
 
 				Expect(versions).To(HaveLen(2))
-				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", preMergeCommitTime.UTC().Format("20060102T150405Z"), preMergeCommit))))
-				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit))))
+				Expect(versions[0]).To(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", preMergeCommitTime.UTC().Format("20060102T150405Z"), preMergeCommit)))
+				Expect(versions[1]).To(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit)))
 			})
 
 			It("repeats the latest version if there are no changes", func() {
@@ -226,7 +227,7 @@ var _ = Describe("Main", func() {
 		}`, releasedir, sinceVersion))
 
 				Expect(versions).To(HaveLen(1))
-				Expect(versions).To(ContainElement(HaveKeyWithValue("version", sinceVersion)))
+				Expect(versions[0]).To(HaveKeyWithValue("version", sinceVersion))
 			})
 
 			It("fetches multiple dev releases", func() {
@@ -248,7 +249,7 @@ var _ = Describe("Main", func() {
 			"version": {
 				"version": "0.0.0-dev.currentlyignored.commit.%s"
 			}
-		}`, releasedir, strings.TrimSpace(thirdCommit)))
+		}`, releasedir, thirdCommit))
 
 				lastCommit, err := testing.RunCommandStdout(releasedir, "git", "rev-parse", "--short", "HEAD")
 				Expect(err).NotTo(HaveOccurred())
@@ -271,9 +272,9 @@ var _ = Describe("Main", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(versions).To(HaveLen(3))
-				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit))))
-				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", secondCommitTime.UTC().Format("20060102T150405Z"), secondCommit))))
-				Expect(versions).To(ContainElement(HaveKeyWithValue("version", fmt.Sprintf("1.1.1-dev.%s.commit.%s", thirdCommitTime.UTC().Format("20060102T150405Z"), thirdCommit))))
+				Expect(versions[0]).To(HaveKeyWithValue("version", fmt.Sprintf("1.1.1-dev.%s.commit.%s", thirdCommitTime.UTC().Format("20060102T150405Z"), thirdCommit)))
+				Expect(versions[1]).To(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", secondCommitTime.UTC().Format("20060102T150405Z"), secondCommit)))
+				Expect(versions[2]).To(HaveKeyWithValue("version", fmt.Sprintf("2.0.1-dev.%s.commit.%s", lastCommitTime.UTC().Format("20060102T150405Z"), lastCommit)))
 			})
 		})
 	})

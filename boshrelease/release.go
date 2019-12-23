@@ -15,6 +15,8 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+var initialVersion = semver.MustParse("0.0.0")
+
 type Release struct {
 	repository    *Repository
 	privateConfig map[string]interface{}
@@ -70,15 +72,21 @@ func (r Release) DevVersions(name, latestVersionCommit string) ([]*semver.Versio
 			return nil, errors.Wrapf(err, "parsing releases index.yml for %s", commit.Commit)
 		}
 
-		baseVersion, err := parsedVersions[0].IncPatch().SetPrerelease(fmt.Sprintf("dev.%s.commit.%s", commit.CommitDate.Format("20060102T150405Z"), commit.Commit))
+		var latestVersionForCommit *semver.Version
+
+		if l := len(parsedVersions); l > 0 {
+			latestVersionForCommit = parsedVersions[l-1]
+		} else {
+			latestVersionForCommit = initialVersion
+		}
+
+		baseVersion, err := latestVersionForCommit.IncPatch().SetPrerelease(fmt.Sprintf("dev.%s.commit.%s", commit.CommitDate.Format("20060102T150405Z"), commit.Commit))
 		if err != nil {
 			return nil, errors.Wrapf(err, "creating version for %s", commit.Commit)
 		}
 
 		versions = append(versions, &baseVersion)
 	}
-
-	sort.Sort(sort.Reverse(semver.Collection(versions)))
 
 	return versions, nil
 }
@@ -256,7 +264,7 @@ func (r Release) parseReleaseIndex(bytes []byte) ([]*semver.Version, error) {
 		versions = append(versions, version)
 	}
 
-	sort.Sort(sort.Reverse(semver.Collection(versions)))
+	sort.Sort(semver.Collection(versions))
 
 	return versions, nil
 }

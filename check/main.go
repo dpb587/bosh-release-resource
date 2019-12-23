@@ -93,9 +93,9 @@ func main() {
 		})
 	}
 
-	if request.Version == nil {
+	if l := len(response); l > 0 && request.Version == nil {
 		// if no prior version, only enumerate the most recent
-		response = response[0:1]
+		response = response[l-1:]
 	}
 
 	err = json.NewEncoder(os.Stdout).Encode(response)

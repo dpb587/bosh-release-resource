@@ -20,12 +20,6 @@ func main() {
 		api.Fatal(errors.Wrap(err, "bad stdin: parse error"))
 	}
 
-	var constraints []*semver.Constraints
-
-	if request.Source.VersionConstraints != nil {
-		constraints = append(constraints, request.Source.VersionConstraints)
-	}
-
 	repository := boshrelease.NewRepository(request.Source.URI, request.Source.Branch, request.Source.PrivateKey)
 
 	err = repository.Pull()
@@ -66,8 +60,18 @@ func main() {
 			api.Fatal(errors.Wrap(err, "bad release: versions"))
 		}
 	} else {
+		var constraints []*semver.Constraints
+
+		if request.Source.VersionConstraints != nil {
+			constraints = append(constraints, request.Source.VersionConstraints)
+		}
+
+		var sinceVersion string
+
 		if request.Version != nil {
-			constraint, err := semver.NewConstraint(fmt.Sprintf(">%s", request.Version.Version))
+			sinceVersion = request.Version.Version
+
+			constraint, err := semver.NewConstraint(fmt.Sprintf(">%s", sinceVersion))
 			if err != nil {
 				api.Fatal(errors.Wrap(err, "bad version: version"))
 			}
@@ -75,7 +79,7 @@ func main() {
 			constraints = append(constraints, constraint)
 		}
 
-		versionsRaw, err = release.Versions(releaseName, constraints)
+		versionsRaw, err = release.Versions(releaseName, constraints, sinceVersion)
 		if err != nil {
 			api.Fatal(errors.Wrap(err, "bad release: versions"))
 		}

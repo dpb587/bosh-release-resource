@@ -183,7 +183,7 @@ func (r Repository) GetCommitList(since string) ([]Commit, error) {
 	if since == "" {
 		revrange = fmt.Sprintf("HEAD^1...%s", revrange)
 	} else {
-		revrange = fmt.Sprintf("%s...%s", since, revrange)
+		revrange = fmt.Sprintf("%s^1...%s", since, revrange)
 	}
 
 	err := r.runRaw(stdout, "log", "--first-parent", "--format=%h %ci", revrange)

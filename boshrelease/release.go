@@ -43,8 +43,8 @@ func (r Release) Name() (string, error) {
 	return config.Name(), nil
 }
 
-func (r Release) DevVersions(name, sinceCommit string) ([]*semver.Version, error) {
-	commits, err := r.repository.GetCommitList(sinceCommit)
+func (r Release) DevVersions(name, latestVersionCommit string) ([]*semver.Version, error) {
+	commits, err := r.repository.GetCommitList(latestVersionCommit)
 	if err != nil {
 		return nil, errors.Wrap(err, "loading commits")
 	}
@@ -83,7 +83,7 @@ func (r Release) DevVersions(name, sinceCommit string) ([]*semver.Version, error
 	return versions, nil
 }
 
-func (r Release) Versions(name string, constraints []*semver.Constraints) ([]*semver.Version, error) {
+func (r Release) Versions(name string, constraints []*semver.Constraints, latestVersion string) ([]*semver.Version, error) {
 	bytes, err := ioutil.ReadFile(path.Join(r.repository.Path(), "releases", name, "index.yml"))
 	if err != nil {
 		return nil, errors.Wrap(err, "reading index.yml")
@@ -97,14 +97,19 @@ func (r Release) Versions(name string, constraints []*semver.Constraints) ([]*se
 	var versions []*semver.Version
 
 	for _, version := range parsedVersions {
-		match := true
+		if version.Original() == latestVersion {
+			// always include
+		} else {
+			// rely on constraints
+			match := true
 
-		for _, constraint := range constraints {
-			match = match && constraint.Check(version)
-		}
+			for _, constraint := range constraints {
+				match = match && constraint.Check(version)
+			}
 
-		if !match {
-			continue
+			if !match {
+				continue
+			}
 		}
 
 		versions = append(versions, version)
